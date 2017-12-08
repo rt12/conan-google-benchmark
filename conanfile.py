@@ -30,13 +30,15 @@ enable_exceptions=True
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_dir='./benchmark', build_dir="./")
+        for option_name in self.options.values.fields:
+            activated = getattr(self.options, option_name)
+            cmake.definitions['BENCHMARK_' + option_name.upper()] = 'ON' if activated else 'OFF'
+        cmake.definitions['BENCHMARK_USE_LIBCXX'] = 'ON' if self.settings.compiler.libcxx else 'OFF'
         print (cmake.command_line)
-        cmake.build()
+        cmake.install()
 
     def package(self):
-        self.copy(pattern='*.h', dst='include', src='include')
-        self.copy(pattern='*{!s}*'.format(self.name), dst='lib', src='lib', keep_path=False)
-        self.copy(pattern='conan_run.log', dst='.', keep_path=False)
+        print("Packaging...")
 
     def package_info(self):
         # let consuming projects know what library name is used for linking
